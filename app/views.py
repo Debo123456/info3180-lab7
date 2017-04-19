@@ -5,12 +5,15 @@ Werkzeug Documentation:  http://werkzeug.pocoo.org/documentation/
 This file creates your application.
 """
 
-from app import app
-from flask import render_template, request, redirect, url_for, jsonify
+from app import app, db, login_manager
+from flask import render_template, request, redirect, url_for, jsonify, flash
+from flask_login import login_user, logout_user, current_user, login_required
 from image_getter import getUrls
 from bs4 import BeautifulSoup
 import requests
 import urlparse
+from models import User, Item
+from forms import LoginForm
 
 ###
 # Routing for your application.
@@ -20,25 +23,150 @@ import urlparse
 def home():
     """Render website's home page."""
     return render_template('home.html')
-    
-@app.route('/api/thumbnails')
-def thumbnails():
-    images = getUrls()
-    if not images:
-        results = {
-            "error" : "true",
-            "message" : "failed",
-            "thumbnails" : []
-        }
-    else:
-         results = {
-            "error" : "null",
-            "message" : "success",
-            "thumbnails" : getUrls()
-        }
-    return jsonify(results)
-    
 
+@app.route('/api/users/register', methods=["GET", "POST"])
+def register():
+    if request.method == "POST":
+        user_email = request.json['email']
+        user_name = request.json['name']
+        user_password = request.json['password']
+        user_age = request.json['age']
+        user_gender = request.json['gender']
+        
+        user = User.query.filter_by(name=user_name).first()
+        if user is not None:
+            flash('Please select another name', 'danger')
+            return redirect(url_for('home'))
+                
+        user = User.query.filter_by(email=user_email).first()
+        if user is not None:
+            flash('There is already an account for this email', 'danger')
+            return redirect(url_for('home'))
+        
+        user = User(user_name, user_email, user_age, user_gender, user_password)
+        db.session.add(user)
+        db.session.commit()
+        flash('User registered!', 'success')
+        
+        user = {
+                "error": None,
+                "data": {        
+                    "user": {
+                        "id": user.get_id(), 
+                        "name": user_name,
+                        "email": user_email,
+                        "age": user_age,
+                        "gender": user_gender,
+                        }
+                    },
+                "message": "Success"
+                }
+
+        return jsonify(user=user), 200 
+    return render_template('register.html')
+    
+@app.route('/api/users/login', methods=["GET", "POST"])
+def login():
+    form = LoginForm()
+    if request.method == "POST" and form.validate_on_submit():
+        email = request.form['email']
+        password = request.form['password']
+        
+        user = User.query.filter_by(email=email, password=password).first()
+        if user is not None:
+            login_user(user)
+            flash('Logged in successfully.', 'success')
+            next = request.args.get('next')
+            return redirect(url_for('home'))
+        else:
+            flash('Email or Password is incorrect.', 'danger')
+            
+    return render_template('login.html',form=form)
+    
+@app.route('/api/users/<int:id>/wishlist', methods=["GET", "POST"])
+def wishlist(id):
+    if request.method == "GET":
+        itemlist = []
+        items = Item.query.order_by(Item.id).all()
+        for item in items:
+            i = {
+                "id": item.id,
+                "title": item.title,
+                "description": item.description,
+                "url": item.url,
+                "thumbnail_url": item.thumbnail_url
+                }
+            itemlist.append(i)
+    
+        return jsonify(items=itemlist), 200
+        
+    elif request.method == "POST":
+        item_title = request.json['title']
+        item_description = request.json['description']
+        item_url = request.json['url']
+        item_thumbnail = request.json['thumbnail_url']
+        
+        item = Item(item_title, item_description, item_url, item_thumbnail)
+        db.session.add(item)
+        db.session.commit()
+        flash('Item added!', 'success')
+        
+        items = {
+                 "error": None,
+                 "data": {
+                    "item": {
+                        "id": item.get_id(),
+                        "title": item_title,
+                        "description": item_description,
+                        "url": item_url,
+                        "thumbnail_url": item_thumbnail
+                        }
+                    },
+                "message": "Success"
+                }
+        return jsonify(items=items), 201
+    return render_template('wishlist.html')
+        
+@app.route('/api/thumbnails', methods=['GET'])
+def thumbnails():
+    if request.method == "GET":
+        images = getUrls()
+        if not images:
+            results = {
+                "error" : True,
+                "message" : "fail",
+                "thumbnails" : []
+            }
+        else:
+             results = {
+                "error" : None,
+                "message" : "success",
+                "thumbnails" : getUrls()
+            }
+        return jsonify(results)
+    return render_template('wishlist.html')
+    
+@app.route('/api/users/<int:user_id>/wishlist/<int:item_id>', methods=['DELETE'])
+def delete_item(user_id, item_id):
+    if request.method == "DELETE":
+        item = Item.query.filter_by(id=item_id).first_or_404()
+        db.session.delete(item)
+        db.session.commit()
+        flash('Item deleted', 'success')
+    
+        return jsonify(result=True)
+    return render_template('wishlist.html')
+    
+@app.route('/api/users/logout')
+@login_required
+def logout():
+    logout_user()
+    flash('You have been logged out.', 'danger')
+    return redirect(url_for('home'))
+
+@login_manager.user_loader
+def load_user(id):
+    return User.query.get(int(id))
 
 ###
 # The functions below should be applicable to all Flask apps.
