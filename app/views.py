@@ -14,6 +14,7 @@ import requests
 import urlparse
 from models import User, Item
 from forms import LoginForm
+import smtplib
 
 ###
 # Routing for your application.
@@ -167,10 +168,39 @@ def logout():
 @login_manager.user_loader
 def load_user(id):
     return User.query.get(int(id))
-
+    
 ###
 # The functions below should be applicable to all Flask apps.
 ###
+
+#Tweak for shaing section in part2
+def send_email(from_name, from_addr, subject, msg):
+    to_name = 'Karishma'
+    to_addr = 'username@gmail.com'
+    message =  """From: {} <{}>\n
+                To: {} <{}>\n\n
+                Subject: {}\n\n
+                {}
+                """
+    message_to_send = message.format(from_name, from_addr, to_name, to_addr, subject, msg)
+
+    username = 'username@gmail.com'
+    password = ''
+
+    server = smtplib.SMTP('smtp.gmail.com:587')
+    server.starttls()
+    server.login(username, password)
+    flag = False
+    try:
+        server.sendmail(from_addr, to_addr, message_to_send)
+    except:
+        flag = True
+    server.quit()
+    
+    if flag == True:
+        return False
+    else:
+        return True
 
 @app.route('/<file_name>.txt')
 def send_text_file(file_name):
