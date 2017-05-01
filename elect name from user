@@ -1,0 +1,13 @@
+                                 Table "public.user"
+  Column  |         Type          |                     Modifiers                     
+----------+-----------------------+---------------------------------------------------
+ id       | integer               | not null default nextval('user_id_seq'::regclass)
+ name     | character varying(80) | 
+ email    | character varying(80) | 
+ age      | integer               | 
+ gender   | character varying(10) | 
+ password | character varying(80) | 
+Indexes:
+    "user_pkey" PRIMARY KEY, btree (id)
+    "user_name_key" UNIQUE CONSTRAINT, btree (name)
+

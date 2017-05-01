@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block main %}
+<h1 class="page-header">Wishlist</h1>
+<p>This is user {{ user.id }}</p>
+<div class="container" ng-app="myApp" ng-controller="addItemCtrl">
+    <div class="row">
+        <div class="col-lg-6 col-lg-offset-3">
+            <div class="panel panel-default" style="width:400px;">
+                <div class="panel-heading">
+                    <h4>Add an item to your wishlist</h4>
+                </div>
+                <div class="panel-body">    
+                    
+                    <form class="form" ng-submit="addItem()" role="form">
+                        <div class="form-group">
+                            <label>Title</label>
+                            <input type="text" class="form-control" name="title" ng-model="title" autofocus required>
+                        </div>
+                        <div class="form-group">
+                            <label>Description</label>
+                            <input type="text" class="form-control" name="description" ng-model="desc" autofocus required>
+                        </div>
+                        <div class="form-group">
+                            <label>URL</label>
+                            <input type="text" class="form-control" name="url" ng-model="url" autofocus required>
+                        </div>
+                        <button type="button" class="btn btn-primary" ng-click="getThumbnail()">Find Thumbnails</button>
+                        
+                        <div class="form-group">
+                            <label>Thumbnail URL</label>
+                            <input type="text" class="form-control" name="thumbnail"  ng-model = "thumbnail_add"autofocus required>
+                        </div>
+                        <button type="submit" class="btn btn-primary" ng-disabled="disabled">Add Item</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+  <p>This is {{ user.id }}</p>
+    
+    {% raw %}
+<div>
+    <div class="main-container">
+        <div class="img-container" ng-repeat="img in thumbnails track by $index" >
+            <img ng-click = "updateThumbnail(img)" src="{{ img }}" />
+        </div>
+    </div>
+</div>
+{% endraw %}
+
+    
+    
+</div>
+
+{% endblock %}
+
+{% block js %}
+<script>
+/* global angular */
+
+var app = angular.module('myApp', []);
+app.controller('addItemCtrl', function($scope, $http) {
+   
+    $scope.addItem = function() {
+        
+        var data = {
+                title: $scope.title,
+                description: $scope.desc,
+                url: $scope.url,
+                thumbnail_url: $scope.thumbnail
+            };
+        
+        
+        $http.post('/api/users/{{ user.id }}/wishlist', data)
+       .then(
+           function(response){
+             alert('Success');
+           }, 
+           function(response){
+             // failure callback
+             alert('fail');
+           }
+        );
+    };
+    
+    $scope.getThumbnail = function() {
+        
+        var data = {
+            url: $scope.url
+        };
+        
+        $http.post('/get-thumbnail', data)
+       .then(
+           function(response){
+             $scope.thumbnails = response.data;
+           }, 
+           function(response){
+             // failure callback
+             alert('failed');
+           }
+        );
+    }
+    
+//
+    $scope.updateThumbnail = function (src){
+        $scope.thumbnail_add = src;
+    };
+});
+</script>
+{% endblock %}

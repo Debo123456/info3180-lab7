@@ -22,12 +22,10 @@ import smtplib
 
 @app.route('/')
 def home():
-    #if current_user.is_authenticated():
-    #    redirect(url_for('homepage'))
-        
     """Render website's home page."""
     return render_template('home.html')
 
+#REQUEST.JSON NEEDS TO BE CHANGED TO REQUEST.FORM TO GET THE DATA FROM THE FORM FOR PART2
 @app.route('/api/users/register', methods=["GET", "POST"])
 def register():
     if request.method == "POST":
@@ -80,7 +78,7 @@ def login():
         if user is not None:
             login_user(user)
             flash('Logged in successfully.', 'success')
-            return redirect(url_for('homepage'));
+            return (url_for('homepage'))
         else:
             flash('Email or Password is incorrect.', 'danger')
             
@@ -90,33 +88,23 @@ def login():
 @app.route('/wishlist')
 @login_required
 def homepage():
-    return render_template('wishlist.html', user = current_user)
+    return render_template('wishlist.html')
+    return render_template('wishlist.html')
     
-@app.route('/get-thumbnail', methods=["GET", "POST"])
-@login_required
-def getThumbnail():
-    url = request.json['url']
-    return jsonify(getUrls(url)), 200
     
-@app.route('/additem')
-@login_required
-def addItem():
-    return render_template('add_item.html', user = current_user)
-
 @app.route('/api/users/<int:id>/wishlist', methods=["GET", "POST"])
 @login_required
 def wishlist(id):
     if request.method == "GET":
         itemlist = []
-        items = Item.query.filter_by(user_id = current_user.id).all()
+        items = Item.query.order_by(Item.id).all()
         for item in items:
             i = {
                 "id": item.id,
                 "title": item.title,
                 "description": item.description,
                 "url": item.url,
-                "thumbnail_url": item.thumbnail_url,
-                "user_id": id
+                "thumbnail_url": item.thumbnail_url
                 }
             itemlist.append(i)
     
@@ -128,7 +116,7 @@ def wishlist(id):
         item_url = request.json['url']
         item_thumbnail = request.json['thumbnail_url']
         
-        item = Item(item_title, item_description, item_url, item_thumbnail, current_user.id)
+        item = Item(item_title, item_description, item_url, item_thumbnail)
         db.session.add(item)
         db.session.commit()
         flash('Item added!', 'success')

@@ -5,3 +5,23 @@ body {
 .nav-tabs {
     margin-bottom: 15px;
 }
+
+.main-container{
+    display:flex;
+    flex-direction:row;
+    flex-wrap:wrap;
+}
+
+.img-container{
+    display:flex;
+    justify-content: center;
+    flex: 1 33.333%;
+    padding: 5px;
+    border: 1px solid #ddd;
+    margin-bottom: 15px;
+}
+
+.img-container img{
+    max-width: 150px;
+    max-height: 150px;
+}

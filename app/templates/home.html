@@ -2,6 +2,14 @@
 
 {% block main %}
 <h1 class="page-header">Welcome to the Wishlist System</h1>
+{% include 'flash_messages.html' %}
+
+<!-- Fix styling for this later.
 <p class="lead">Please create an account on our wish list system so that you can share with your friends
 based on everything you are interested in.</p>
+-->
+<p class="lead">Please <a href="{{ url_for('login') }}"> login </a> or <a href="{{ url_for('register') }}">
+create an account</a> if you do not already have one.</p>
+
+
 {% endblock %}

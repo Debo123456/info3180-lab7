@@ -3,4 +3,32 @@
 {% block main %}
 
 <h1 class="page-header">Wishlist</h1>
+{% include 'flash_messages.html' %}
+
+
+
+{% raw %}
+<div ng-app="myApp" ng-controller="myCtrl">
+    <div class="main-container">
+        <div ng-repeat="item in wishlist track by $index">
+            {{ item }}
+        </div>
+    </div>
+</div>
+{% endraw %}
+
+
+{% endblock %}
+
+{% block js %}
+<script type="text/javascript">
+    /* global angular */
+
+var app = angular.module('myApp', []);
+app.controller("myCtrl", function($scope, $http) {
+    $http.get('/api/users/{{ user.id }}/wishlist').then(function(response) {
+        $scope.wishlist = response.data;
+    });
+});
+</script>
 {% endblock %}

@@ -3,7 +3,17 @@
 {% block main %}
 <h1 class="page-header">Thumbnails</h1>
 <p class="lead">Thumbnail api results.</p>
-{{ results.message }} 
+
+{% raw %}
+<div ng-app="myApp" ng-controller="myCtrl">
+    <div class="main-container">
+        <div class="img-container" ng-repeat="img in image track by $index">
+            <img src="{{ img }}" />
+        </div>
+    </div>
+</div>
+{% endraw %}
+
 {% endblock %}
 
 {{ results }}

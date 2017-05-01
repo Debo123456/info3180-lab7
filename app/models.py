@@ -24,7 +24,7 @@ class User(db.Model):
             return str(self.id)  # python 3 support
 
     def __repr__(self):
-        return '<User %r>' % (self.name)\
+        return '<User %r>' % (self.name)
         
     def __init__(self, name, email, age, gender, password):
         self.name = name
@@ -39,7 +39,8 @@ class Item(db.Model):
     description = db.Column(db.String(80))
     url = db.Column(db.String(255))
     thumbnail_url = db.Column(db.String(255))
-
+    user_id = db.Column(db.Integer, db.ForeignKey(User.id))
+    
     def is_authenticated(self):
         return True
 
@@ -58,8 +59,9 @@ class Item(db.Model):
     def __repr__(self):
         return '<Item %r>' % (self.title)
         
-    def __init__(self, title, description, url, thumbnail_url):
+    def __init__(self, title, description, url, thumbnail_url,user_id):
         self.title = title
         self.description = description
         self.url = url
         self.thumbnail_url = thumbnail_url
+        self.user_id = user_id
