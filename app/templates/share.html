@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block css %}
+<style>
+  em{
+    color:red;
+  }
+  .flash {
+    color:purple;
+  }
+</style>
+{% endblock %}
+{% block main %}
+<h1 class="page-header">Share Wishlist</h1>
+  <hr class="hr-primary" />
+{% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <ul class=flash>
+        {% for message in messages %}
+          <li>{{ message }}</li>
+        {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+<!--<p>Fill in this form to contact the site owners.</p> -->
+
+ <form action="/share/", method="POST">
+  
+  <div class="form-group">
+  <div class="clearfix"></div>
+  <h2>Who are we sharing with?</h2>
+  <div class="col-xs-4">
+    <label for="name">Name <em>(Required)</em></p> </label>
+    <input type="Name" class="form-control" name="name"placeholder="Name" required="true">
+  </div>
+  <div class="form-group">
+  <div class="clearfix"></div>
+<div class="col-xs-4">
+    <label for="email">Email <em>(Required)</em></label>
+    <input type="Email" class="form-control" name="email" placeholder="Email" required='true'>
+  </div>
+  <div>
+    <div class="form-group">
+    <div class="clearfix"></div>
+  
+  
+  <br>
+  <button type="submit" class="btn btn-primary">Send</button>
+  
+</form>
+{% endblock %}

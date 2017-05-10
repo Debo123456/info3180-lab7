@@ -10,11 +10,13 @@ from flask import render_template, request, redirect, url_for, jsonify, flash
 from flask_login import login_user, logout_user, current_user, login_required
 from image_getter import getUrls
 from bs4 import BeautifulSoup
+from send_email import send_email
 import requests
 import urlparse
 from models import User, Item
 from forms import LoginForm
 import smtplib
+
 
 ###
 # Routing for your application.
@@ -197,33 +199,25 @@ def load_user(id):
 ###
 
 #Tweak for shaing section in part2
-def send_email(from_name, from_addr, subject, msg):
-    to_name = 'Karishma'
-    to_addr = 'username@gmail.com'
-    message =  """From: {} <{}>\n
-                To: {} <{}>\n\n
-                Subject: {}\n\n
-                {}
-                """
-    message_to_send = message.format(from_name, from_addr, to_name, to_addr, subject, msg)
-
-    username = 'username@gmail.com'
-    password = ''
-
-    server = smtplib.SMTP('smtp.gmail.com:587')
-    server.starttls()
-    server.login(username, password)
-    flag = False
-    try:
-        server.sendmail(from_addr, to_addr, message_to_send)
-    except:
-        flag = True
-    server.quit()
-    
-    if flag == True:
-        return False
-    else:
-        return True
+@app.route("/share/", methods=['GET','POST'])
+@login_required
+def share():
+    if request.method == "POST":
+        to_name = request.form['name']  
+        to_email = request.form['email']
+        subject = "Check out my wishlist!"
+        mylink = ""
+        msg = "{}".format(mylink) #format to sent link to current user wishlist
+        
+        send_email(to_name, to_email, subject, msg)
+        
+        if send_email(to_name, to_email, subject, msg):
+            flash('Sent!!!')
+            return redirect(url_for('homepage'))
+        else:
+            flash('Email was not sent')
+            return redirect(url_for('homepage'))
+    return render_template("share.html")
 
 @app.route('/<file_name>.txt')
 def send_text_file(file_name):

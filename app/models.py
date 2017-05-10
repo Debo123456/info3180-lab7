@@ -65,3 +65,12 @@ class Item(db.Model):
         self.url = url
         self.thumbnail_url = thumbnail_url
         self.user_id = user_id
+
+# class Share(db.Model):
+#     id = db.Column(db.Integer, primary_key=True)
+#     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+
+
+#     def get_id(self):
+#         try:
+#             return unicode(self.id)

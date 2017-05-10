@@ -11,7 +11,7 @@
 <div ng-app="myApp" ng-controller="myCtrl">
     <p>Pick an item to delete from your list.</p>
     <div class="main-container">
-        <div ng-repeat="item in wishlist track by $index"  ng-click="removeItem($index)">
+        <div ng-repeat="item in wishlist track by $index" ng-click="removeItem($index)">
             {{ item }}
         </div>
     </div>
@@ -29,16 +29,18 @@ var app = angular.module('myApp', []);
 app.controller("myCtrl", function($scope, $http) {
     $http.get('/api/users/{{ user.id }}/wishlist').then(function(response) {
         $scope.wishlist = response.data;
-    })
+    }
     
-    // $scope.removeItem() = function(x){
-    //     $http.delete('/api/users/{{user_id}}/wishlist/{{'x.item_id'}}')
-    //     .then(function(){
-    //         $scope.wishlist.splice(x,1)
-    //     }, function(){
-    //         flash("Error! Could not delete {{x}}");
-    //     })
-    // }
+    $scope.removeItem() = function(x){
+        $http.delete('/api/users/{{user_id}}/wishlist/{{x.item_id}}')
+        .then(function(){
+            $scope.wishlist.splice(x,1)
+        }, function(){
+            flash("Error! Could not delete {{x}}");
+        }
+        )
+    }
+    );
 });
 </script>
 {% endblock %}
